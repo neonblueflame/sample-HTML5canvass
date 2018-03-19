@@ -14,88 +14,142 @@
   </style>
 </head>
 
+<!-- Try multiple canvas -->
 <body onload="start()">
   <script>
     var GAME_AREA_WIDTH = 480;
     var GAME_AREA_HEIGHT = 270;
-    var WALK_SPEED = 10;
+    
+    // Sprite config
+    var WALK_SPEED_PACE = 2;
+    var WALK_SPEED_TIME = 100;
     var SPRITE_WIDTH = 30;
     var SPRITE_HEIGHT = 30;
     
-    var sprite;
+    // Directions config
+    var DIR_LEFT = "left";
+    var DIR_UP = "up";
+    var DIR_RIGHT = "right";
+    var DIR_DOWN = "down";
+    var DIR = [DIR_LEFT, DIR_UP, DIR_RIGHT, DIR_DOWN];
   
     function start() {
       GameArea.init();
-      sprite = new Component(
-        SPRITE_WIDTH
+      
+      var sprite = new Sprite(
+          SPRITE_WIDTH
         , SPRITE_HEIGHT
         , "blue"
-        , (GAME_AREA_WIDTH / 2) - (SPRITE_WIDTH / 2)
-        , (GAME_AREA_HEIGHT / 2) - (SPRITE_HEIGHT / 2)
+        , new Pos(
+            (GAME_AREA_WIDTH / 2) - (SPRITE_WIDTH / 2)
+          , (GAME_AREA_HEIGHT / 2) - (SPRITE_HEIGHT / 2)
+          , DIR_UP)
       );
       
-      document.addEventListener("keypress", movesprite);
-    }
-    
-    function movesprite(e) {
-      var key = e.keyCode;
-      console.log(sprite);
-      switch(key) {
-        case 37: // Left 
-          if (sprite.x > 0)
-            sprite.x -= WALK_SPEED;
-          break;
-        case 38: // Up
-          if (sprite.y > 0)
-            sprite.y -= WALK_SPEED;
-          break;
-        case 39: // Right
-          if (sprite.x < 450)
-            sprite.x += WALK_SPEED;
-          break;
-        case 40: // Down
-          if (sprite.y < 240)
-            sprite.y += WALK_SPEED;
-          break;
-        default:
-          break;
-      }
-      
-      GameArea.clear();
-      sprite.update();
+      var sprite2 = new Sprite(
+          SPRITE_WIDTH
+        , SPRITE_HEIGHT
+        , "green"
+        , new Pos(
+            (GAME_AREA_WIDTH / 3) - (SPRITE_WIDTH / 3)
+          , (GAME_AREA_HEIGHT / 3) - (SPRITE_HEIGHT / 3)
+          , DIR_UP)
+      );
     }
     
     var GameArea = {
-      canvas : document.createElement("canvas")
+        canvas : document.createElement("canvas")
       , init : function() {
           this.canvas.width = GAME_AREA_WIDTH;
           this.canvas.height = GAME_AREA_HEIGHT;
           this.context = this.canvas.getContext("2d");
           document.body.insertBefore(
-            this.canvas
+              this.canvas
             , document.body.childNodes[0]);
       }
       , clear : function() {
-        this.context.clearRect(0, 0
-          , this.canvas.width, this.canvas.height);
+          this.context.clearRect(0, 0
+            , this.canvas.width, this.canvas.height);
       }
     };
     
-    var Component = function(width, height, color, x, y) {
+    var Sprite = function(width, height, color, pos) {
       this.width = width;
       this.height = height;
-      this.x = x;
-      this.y = y;
+      this.x = pos.x;
+      this.y = pos.y;
+      this.walkInterval = 0;
+      
+      sprite = this;
+      
+      console.log(sprite);
       
       this.update = function() {
-        this.x += 0;
-        this.y += 0;
+        sprite.x += 0;
+        sprite.y += 0;
         
         context = GameArea.context;
         context.fillStyle = color;
-        context.fillRect(this.x, this.y, this.width, this.height);
+        context.fillRect(sprite.x, sprite.y, sprite.width, sprite.height);
       };
+      
+      this.pause = function() {
+        clearInterval(sprite.walkInterval);
+      };
+      
+      this.move = function(pos) {
+        // console.log(sprite);
+        console.log(pos);
+        
+        switch(pos.dir) {
+          case DIR_LEFT:
+            if (sprite.x > 0)
+              sprite.x -= WALK_SPEED_PACE;
+            else
+              sprite.pause();
+            break;
+            
+          case DIR_UP: // Up
+            if (sprite.y > 0)
+              sprite.y -= WALK_SPEED_PACE;
+            else
+              sprite.pause();
+            break;
+            
+          case DIR_RIGHT: // Right
+            if (sprite.x < 450)
+              sprite.x += WALK_SPEED_PACE;
+            else
+              sprite.pause();
+            break;
+            
+          case DIR_DOWN: // Down
+            if (sprite.y < 240)
+              sprite.y += WALK_SPEED_PACE;
+            else
+              sprite.pause();
+            break;
+            
+          default:
+            break;
+        }
+        
+        GameArea.clear();
+        sprite.update();
+      };
+      
       this.update();
+      this.walkInterval = setInterval(this.move, WALK_SPEED_TIME, pos);
+    }
+    
+    var Pos = function(newX, newY, newDir) {
+      this.x = newX;
+      this.y = newY;
+      this.dir = newDir;
+      
+      this.calculate = function() {
+        
+      };
     }
   </script>
   <p>
